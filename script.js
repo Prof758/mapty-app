@@ -65,7 +65,7 @@ class Cycling extends Workout {
 // test code for classes
 const run1 = new Running([23, -7], 45, 8, 140);
 const cycle1 = new Cycling([23, -7], 45, 48, 840);
-console.log(run1, cycle1);
+// console.log(run1, cycle1);
 
 /////
 class App {
@@ -75,8 +75,15 @@ class App {
   #workouts = [];
 
   constructor() {
+    // get user's position
     this._getPosition();
+
+    // get data from local storage
+    this._getLocalStorage();
+
+    // event handlers
     form.addEventListener('submit', this._newWorkout.bind(this));
+    inputType.addEventListener('change', this._toggleElevationField);
     containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
   }
 
@@ -97,7 +104,7 @@ class App {
     const { longitude } = position.coords;
 
     // testing map code
-    console.log(`https://www.google.com/maps/@${latitude},${longitude},`);
+    // console.log(`https://www.google.com/maps/@${latitude},${longitude},`);
 
     const coords = [latitude, longitude];
 
@@ -116,6 +123,8 @@ class App {
       .setPopupContent('Home');
 
     this.#map.on('click', this._showForm.bind(this));
+
+    this.#workouts.forEach((work) => this._renderNewWorkoutMaker(work));
   }
 
   _showForm(mapE) {
@@ -179,10 +188,10 @@ class App {
 
     // Add new object to workout array
     this.#workouts.push(workout);
-    console.log(workout);
+    // console.log(workout);
 
     const testWorkerArr = this.#workouts;
-    console.log(testWorkerArr);
+    // console.log(testWorkerArr);
 
     //Render workout on map as marker
     this._renderNewWorkoutMaker(workout);
@@ -192,6 +201,9 @@ class App {
 
     // clear inputs and hide form
     this._hideForm();
+
+    // add all workouts to Local storage
+    this._setLocalStorage();
   }
 
   _toggleElevationField() {
@@ -272,7 +284,7 @@ class App {
     if (!this.#map) return;
 
     const workoutEl = e.target.closest('.workout');
-    console.log(workoutEl);
+    // console.log(workoutEl);
 
     if (!workoutEl) return;
 
@@ -284,7 +296,7 @@ class App {
     //   console.error('Workout not found');
     //   return;
     // }
-    console.log(workout);
+    // console.log(workout);
 
     this.#map.setView(workout.coords, this.#mapZoomLevel, {
       animate: true,
@@ -293,7 +305,27 @@ class App {
       },
     });
 
-    workout.click();
+    // workout.click();
+  }
+
+  _setLocalStorage() {
+    localStorage.setItem('workouts', JSON.stringify(this.#workouts));
+  }
+
+  _getLocalStorage() {
+    const data = JSON.parse(localStorage.getItem('workouts'));
+    // console.log(data);
+
+    if (!data) return;
+
+    this.#workouts = data;
+
+    this.#workouts.forEach((work) => this._renderWorkoutList(work));
+  }
+
+  reset() {
+    localStorage.removeItem('workouts');
+    location.reload();
   }
 }
 
